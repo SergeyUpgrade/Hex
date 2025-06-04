@@ -13,6 +13,7 @@ FastAPI-сервис для работы с географическими да�
 
 Клонируйте репозиторий:
 git clone https://github.com/yourusername/h3-hexagon-api.git
+
 cd h3-hexagon-api
 poetry run uvicorn main:app --reload
 
