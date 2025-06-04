@@ -15,6 +15,7 @@ FastAPI-сервис для работы с географическими да�
 git clone https://github.com/yourusername/h3-hexagon-api.git
 
 cd h3-hexagon-api
+
 poetry run uvicorn main:app --reload
 
 1. Получение дочерних ячеек
