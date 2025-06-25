@@ -3,9 +3,10 @@ from fastapi import FastAPI, HTTPException
 import h3
 from typing import List, Dict
 import statistics
+
+from shapely.geometry import Point, Polygon
 from pydantic import BaseModel
 from math import radians, sin, cos, sqrt, atan2
-
 
 app = FastAPI()
 
@@ -15,6 +16,7 @@ class HexagonData(BaseModel):
     h3_index: str
     level: int
     cell_id: int
+
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     # Радиус Земли в километрах
@@ -35,6 +37,10 @@ def haversine_distance(lat1, lon1, lat2, lon2):
 
 
 def generate_initial_dataset() -> List[Dict]:
+    """
+    Создаем датасет
+    :return:
+    """
     center_lat, center_lon = 56.0, 38.0  # 56°N 38°E
     radius_km = 7
     resolution = 12
@@ -73,6 +79,42 @@ async def get_hex(parent_hex: str):
         return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+#@app.get("/bbox", response_model=List[HexagonData])
+#def filter_by_border(border: str):
+#    """
+#    Фильтрует датасет, оставляя только элементы, попадающие в заданные границы
+#
+#    Параметры:
+#    dataset - исходный массив данных в формате [[h3_index, level, cell_id], ...]
+#    border - строка с координатами границ в формате "lat1,lon1,lat2,lon2,...,latN,lonN"
+#
+#    Возвращает:
+#    Отфильтрованный массив данных
+#    """
+#    # 1. Преобразуем border в список координат полигона
+#    points = []
+#    for pair in border.split(','):
+#        lat, lon = map(float, pair.split('/'))
+#        points.append((lon, lat))  # Shapely использует (x,y) = (lon,lat)
+#
+#    if len(points) < 3:
+#        raise HTTPException(status_code=400, detail="Необходимо минимум 3 точки для полигона")
+#
+#    polygon = Polygon(points)
+#
+#    # 2. Фильтруем датасет
+#    filtered_data = []
+#    for item in DATASET:
+#        h3_index = item[0]
+#        lat, lon = h3.cell_to_latlng(h3_index)
+#        point = Point(lon, lat)
+#
+#        if polygon.contains(point):
+#            filtered_data.append(item)
+#
+#    return filtered_data
 
 
 @app.get("/bbox", response_model=List[HexagonData])
@@ -164,4 +206,5 @@ async def get_avg(resolution: int):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="127.0.0.1", port=8000)
